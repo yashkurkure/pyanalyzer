@@ -3,9 +3,16 @@ import sys
 import os
 from collections import defaultdict
 
-def count_loops_and_functions(content):
+def count_loops_and_functions(pyprogram):
+	"""
+	Refer: https://stackoverflow.com/questions/1515357/simple-example-of-how-to-use-ast-nodevisitor
+	count_loops_and_functions counts the python constructs in the file.
 
-	tree = ast.parse(content)
+	:param path: a python program in the form of a string.
+	:return: counts and metrics about the constructs in the python program
+	"""
+
+	tree = ast.parse(pyprogram)
 
 	for_count, while_count, user_func_count = 0, 0, 0
 	for_loop_lines, while_loop_lines = [], []
@@ -76,19 +83,29 @@ def main():
 			exit(-1)
 
 	# Get the entire file
-	[content] = readFile(filepath, readfull=True)
+	[pyprogram] = readFile(filepath, readfull=True)
 
-	result = count_loops_and_functions(content)
+	result = count_loops_and_functions(pyprogram)
 	for_count, while_count, user_func_count, for_loop_lines, while_loop_lines, user_functions, user_function_calls, unique_non_user_function_calls = result
 
-	print(f"Number of 'for' loops: {for_count}")
-	print(f"Number of 'while' loops: {while_count}")
-	print(f"Number of user-defined functions: {user_func_count}")
-	print(f"Line numbers of 'for' loops: {for_loop_lines}")
-	print(f"Line numbers of 'while' loops: {while_loop_lines}")
-	print(f"User-defined functions and their line numbers: {dict(user_functions)}")
-	print(f"User-defined function calls and their line numbers: {dict(user_function_calls)}")
-	print(f"Unique non-user-defined function calls: {unique_non_user_function_calls}")
+	print("\nAnalysis Results:\n")
+	print(f"1. Number of 'for' loops: {for_count}")
+	print(f"   Line numbers of 'for' loops: {for_loop_lines}\n")
+
+	print(f"2. Number of 'while' loops: {while_count}")
+	print(f"   Line numbers of 'while' loops: {while_loop_lines}\n")
+
+	print(f"3. Number of user-defined functions: {user_func_count}")
+	print("   User-defined functions and their line numbers:")
+	for func, lineno in user_functions.items():
+		print(f"      {func}: {lineno}\n")
+
+	print("4. User-defined function calls and their line numbers:")
+	for func, lines in user_function_calls.items():
+		print(f"   {func}: {lines}\n")
+
+	print("5. Unique non-user-defined function calls:")
+	print(f"   {', '.join(sorted(unique_non_user_function_calls))}\n")
 
 if __name__ == "__main__":
 	main()
