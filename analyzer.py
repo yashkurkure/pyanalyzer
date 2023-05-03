@@ -14,8 +14,8 @@ def count_loops_and_functions(pyprogram):
 
 	tree = ast.parse(pyprogram)
 
-	for_count, while_count, user_func_count = 0, 0, 0
-	for_loop_lines, while_loop_lines = [], []
+	for_count, while_count, user_func_count, if_count = 0, 0, 0, 0 
+	for_loop_lines, while_loop_lines, if_lines = [], [], []
 	user_functions, user_function_calls = defaultdict(int), defaultdict(list)
 	unique_non_user_function_calls = set()
 
@@ -45,10 +45,16 @@ def count_loops_and_functions(pyprogram):
 			while_count += 1
 			while_loop_lines.append(node.lineno)
 			self.generic_visit(node)
+		
+		def visit_If(self, node):
+			nonlocal if_count
+			if_count += 1
+			if_lines.append(node.lineno)
+			self.generic_visit(node)
 
 	FunctionVisitor().visit(tree)
 
-	return for_count, while_count, user_func_count, for_loop_lines, while_loop_lines, user_functions, user_function_calls, unique_non_user_function_calls
+	return for_count, while_count, if_count, user_func_count, for_loop_lines, while_loop_lines, if_lines, user_functions, user_function_calls, unique_non_user_function_calls
 
 def readFile(path, readfull = True):
 	"""
@@ -86,7 +92,7 @@ def main():
 	[pyprogram] = readFile(filepath, readfull=True)
 
 	result = count_loops_and_functions(pyprogram)
-	for_count, while_count, user_func_count, for_loop_lines, while_loop_lines, user_functions, user_function_calls, unique_non_user_function_calls = result
+	for_count, while_count, if_count, user_func_count, for_loop_lines, while_loop_lines, if_lines, user_functions, user_function_calls, unique_non_user_function_calls = result
 
 	print("\nAnalysis Results:\n")
 	print(f"1. Number of 'for' loops: {for_count}")
@@ -95,17 +101,21 @@ def main():
 	print(f"2. Number of 'while' loops: {while_count}")
 	print(f"   Line numbers of 'while' loops: {while_loop_lines}\n")
 
-	print(f"3. Number of user-defined functions: {user_func_count}")
+	print(f"3. Number of 'if' statements: {if_count}")
+	print(f"   Line numbers of 'if' statements: {if_lines}\n")
+
+	print(f"4. Number of user-defined functions: {user_func_count}")
 	print("   User-defined functions and their line numbers:")
 	for func, lineno in user_functions.items():
 		print(f"      {func}: {lineno}\n")
 
-	print("4. User-defined function calls and their line numbers:")
+	print("5. User-defined function calls and their line numbers:")
 	for func, lines in user_function_calls.items():
 		print(f"   {func}: {lines}\n")
 
-	print("5. Unique non-user-defined function calls:")
+	print("6. Unique non-user-defined function calls:")
 	print(f"   {', '.join(sorted(unique_non_user_function_calls))}\n")
+
 
 if __name__ == "__main__":
 	main()
