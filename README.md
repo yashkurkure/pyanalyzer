@@ -1,5 +1,5 @@
 # pyanalyzer
-return the counts of diffferent constructs in a single python file
+Returns the counts of diffferent constructs in a single python file using python's ast.
 
 Usage
 ```
